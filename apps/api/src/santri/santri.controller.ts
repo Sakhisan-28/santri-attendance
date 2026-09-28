@@ -6,9 +6,12 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { pool } from '../database.js';
 
+@UseGuards(JwtAuthGuard)
 @Controller('santri')
 export class SantriController {
   @Get()

@@ -8,6 +8,7 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
   return (
     <main className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
@@ -28,7 +29,7 @@ export default function Home() {
             e.preventDefault();
 
             const response = await fetch(
-              "http://localhost:3001/auth/login",
+              `${API_URL}/auth/login`,
               {
                 method: "POST",
                 headers: {
@@ -43,11 +44,15 @@ export default function Home() {
 
             const data = await response.json();
 
-            if (data.username) {
-                router.push("/dashboard");
-           } else {
-               setMessage(data.message);
-          }
+            if (response.ok && data.username) {
+              if (data.access_token) {
+                localStorage.setItem("access_token", data.access_token);
+              }
+              localStorage.setItem("username", data.username);
+              router.push("/dashboard");
+            } else {
+              setMessage(data.message ?? "Login gagal");
+            }
           }}
         >
           <div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { apiFetch } from "@/lib/api";
 
 interface Santri {
   id: number;
@@ -17,9 +18,6 @@ interface Absensi {
   nama: string;
   kelas: string;
 }
-
-const SANTRI_API = "http://localhost:3001/santri";
-const ABSENSI_API = "http://localhost:3001/absensi";
 
 const STATUS_OPTIONS = ["Hadir", "Izin", "Sakit", "Alpha"];
 
@@ -39,15 +37,11 @@ export default function AbsensiPage() {
   const [formLoading, setFormLoading] = useState(false);
 
   const fetchSantri = async () => {
-    const res = await fetch(SANTRI_API);
-    if (!res.ok) throw new Error("Gagal memuat data santri");
-    return res.json();
+    return apiFetch<Santri[]>("/santri");
   };
 
   const fetchAbsensi = async () => {
-    const res = await fetch(ABSENSI_API);
-    if (!res.ok) throw new Error("Gagal memuat data absensi");
-    return res.json();
+    return apiFetch<Absensi[]>("/absensi");
   };
 
   useEffect(() => {
@@ -102,7 +96,7 @@ export default function AbsensiPage() {
     setFormError(null);
 
     try {
-      const url = editingAbsensi ? `${ABSENSI_API}/${editingAbsensi.id}` : ABSENSI_API;
+      const url = editingAbsensi ? `/absensi/${editingAbsensi.id}` : "/absensi";
       const method = editingAbsensi ? "PUT" : "POST";
 
       const payload = {
@@ -111,16 +105,10 @@ export default function AbsensiPage() {
         status: formData.status,
       };
 
-      const res = await fetch(url, {
+      await apiFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || "Gagal menyimpan data");
-      }
 
       const updatedList = await fetchAbsensi();
       setAbsensiList(updatedList);
@@ -138,8 +126,7 @@ export default function AbsensiPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${ABSENSI_API}/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Gagal menghapus data");
+      await apiFetch(`/absensi/${id}`, { method: "DELETE" });
       const updatedList = await fetchAbsensi();
       setAbsensiList(updatedList);
     } catch (err) {

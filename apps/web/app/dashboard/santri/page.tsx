@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { apiFetch } from "@/lib/api";
 
 interface Santri {
   id: number;
@@ -8,8 +9,6 @@ interface Santri {
   kelas: string;
   status: string;
 }
-
-const API_BASE = "http://localhost:3001/santri";
 
 export default function SantriPage() {
   const [santriList, setSantriList] = useState<Santri[]>([]);
@@ -22,9 +21,7 @@ export default function SantriPage() {
   const [formLoading, setFormLoading] = useState(false);
 
   const fetchSantri = async () => {
-    const res = await fetch(API_BASE);
-    if (!res.ok) throw new Error("Gagal memuat data santri");
-    return res.json();
+    return apiFetch<Santri[]>("/santri");
   };
 
   useEffect(() => {
@@ -71,19 +68,13 @@ export default function SantriPage() {
     setFormError(null);
 
     try {
-      const url = editingSantri ? `${API_BASE}/${editingSantri.id}` : API_BASE;
+      const url = editingSantri ? `/santri/${editingSantri.id}` : "/santri";
       const method = editingSantri ? "PUT" : "POST";
 
-      const res = await fetch(url, {
+      await apiFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || "Gagal menyimpan data");
-      }
 
       const updatedList = await fetchSantri();
       setSantriList(updatedList);
@@ -101,8 +92,7 @@ export default function SantriPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Gagal menghapus data");
+      await apiFetch(`/santri/${id}`, { method: "DELETE" });
       const updatedList = await fetchSantri();
       setSantriList(updatedList);
     } catch (err) {

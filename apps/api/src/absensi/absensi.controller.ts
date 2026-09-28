@@ -7,9 +7,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { pool } from '../database.js';
 
+@UseGuards(JwtAuthGuard)
 @Controller('absensi')
 export class AbsensiController {
   @Get()

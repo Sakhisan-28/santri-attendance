@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { signJwt } from './jwt.utils.js';
 
 @Injectable()
 export class AuthService {
@@ -7,11 +8,10 @@ export class AuthService {
       return {
         message: 'Login berhasil',
         username: username,
+        access_token: signJwt({ sub: '1', username }),
       };
     }
 
-    return {
-      message: 'Username atau password salah',
-    };
+    throw new UnauthorizedException('Username atau password salah');
   }
 }
